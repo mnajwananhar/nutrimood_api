@@ -553,6 +553,8 @@ async def get_food_details(food_name: str):
             'primary_mood_num': 0
         }
     }
+
+@app.get("/debug/compare-foods")
 async def compare_foods(food1: str, food2: str):
     """Compare features between two foods"""
     if food_recommender is None or food_recommender.food_df is None:
@@ -579,12 +581,20 @@ async def compare_foods(food1: str, food2: str):
     }
     
     return result
-async def debug_full_process(request: RecommendationRequest):
+
+@app.get("/debug/full-process")
+async def debug_full_process(mood: str = "energizing", health_conditions: str = "diabetes", top_n: int = 5):
     """Debug lengkap untuk melihat seluruh proses"""
     if food_recommender is None or food_recommender.food_df is None:
         raise HTTPException(status_code=503, detail="Dataset belum dimuat")
     
     try:
+        request = RecommendationRequest(
+            mood=mood,
+            health_conditions=[health_conditions] if health_conditions else None,
+            top_n=top_n
+        )
+        
         print(f"\n=== FULL DEBUG PROCESS ===")
         print(f"Request: {request}")
         
@@ -657,6 +667,8 @@ async def debug_full_process(request: RecommendationRequest):
     except Exception as e:
         print(f"Error in full debug: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/debug/energizing-foods")
 async def debug_energizing_foods():
     """Debug endpoint untuk melihat makanan energizing"""
     if food_recommender is None or food_recommender.food_df is None:
@@ -675,6 +687,8 @@ async def debug_energizing_foods():
         "top_10_by_calories": top_energizing[['name', 'calories', 'proteins', 'fat', 'carbohydrate']].to_dict('records'),
         "search_kacang": df[df['name'].str.contains('kacang', case=False, na=False)][['name', 'calories', 'primary_mood', 'is_energizing']].to_dict('records') if 'is_energizing' in df.columns else []
     }
+
+@app.get("/debug/dataset-info")
 async def get_dataset_info():
     """Debug endpoint untuk melihat info dataset"""
     if food_recommender is None or food_recommender.food_df is None:
@@ -802,4 +816,4 @@ async def get_available_health_conditions():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
