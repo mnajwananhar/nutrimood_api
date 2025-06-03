@@ -494,15 +494,15 @@ async def startup_event():
     """Load data dan model saat startup"""
     try:
         # Load food recommender dari pickle
-        if os.path.exists('food_recommender.pkl'):
-            with open('food_recommender.pkl', 'rb') as f:
+        if os.path.exists('models/food_recommender.pkl'):
+            with open('models/food_recommender.pkl', 'rb') as f:
                 global food_recommender
                 food_recommender = pickle.load(f)
             print("Food recommender loaded dari pickle file")
         else:
             # Jika file pickle tidak ada, load dari CSV
-            if os.path.exists('nutrimood_preprocessed.csv'):
-                food_recommender.load_data('nutrimood_preprocessed.csv')
+            if os.path.exists('models/nutrimood_preprocessed.csv'):
+                food_recommender.load_data('models/nutrimood_preprocessed.csv')
                 print("Food recommender loaded dari CSV file")
             else:
                 print("Warning: File dataset tidak ditemukan")
