@@ -493,6 +493,10 @@ food_recommender = FoodRecommender()
 async def startup_event():
     """Load data dan model saat startup"""
     try:
+        # Fix module reference untuk pickle
+        import sys
+        sys.modules['__main__'].FoodRecommender = FoodRecommender
+        
         # Load food recommender dari pickle
         if os.path.exists('models/food_recommender.pkl'):
             with open('models/food_recommender.pkl', 'rb') as f:
@@ -500,15 +504,10 @@ async def startup_event():
                 food_recommender = pickle.load(f)
             print("Food recommender loaded dari pickle file")
         else:
-            # Jika file pickle tidak ada, load dari CSV
-            if os.path.exists('models/nutrimood_preprocessed.csv'):
-                food_recommender.load_data('models/nutrimood_preprocessed.csv')
-                print("Food recommender loaded dari CSV file")
-            else:
-                print("Warning: File dataset tidak ditemukan")
+            print("Error: models/food_recommender.pkl tidak ditemukan")
     except Exception as e:
         print(f"Error loading data: {str(e)}")
-
+        food_recommender = None
 @app.get("/")
 async def root():
     """Root endpoint"""
@@ -816,4 +815,4 @@ async def get_available_health_conditions():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
